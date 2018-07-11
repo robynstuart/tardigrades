@@ -20,11 +20,10 @@ library (lsmeans)
 # Set global variables and read in data
 ########################################
 setwd("~/Documents/git/tardigrades")
-desiccation <- read_excel("desiccation-data.xlsx", sheet="5 - All data")
-controls <- read_excel("desiccation-data.xlsx", sheet = "Controls")
+desiccation <- read_excel("Sørensen-Hygum et al. 2018_Modelling extreme desiccation tolerance.raw-RMS.xlsx", sheet="Desiccation recovery")
+controls <- read_excel("Sørensen-Hygum et al. 2018_Modelling extreme desiccation tolerance.raw-RMS.xlsx", sheet = "Controls")
 
-desiccation <- desiccation[-165,1:8]
-desiccation <- desiccation[desiccation$Surface!="Filter paper dH20",]
+desiccation <- desiccation[-147,1:8]
 desiccation$Surface = as.factor(desiccation$Surface)
 
 st.err <- function(x) { sd(x)/sqrt(length(x)) }
@@ -37,11 +36,8 @@ stdevs <- aggregate(controls$Prop, list(controls$Day), st.err)
 (cbind(means,stdevs[,2]))
 
 # A Wilcoxon rank sum test...
-t.test(controls$Prop[controls$Day==1],controls$Prop[controls$Day==3])
-wilcox.test(controls$Prop[controls$Day==1],controls$Prop[controls$Day==3])
-
-t.test(controls$Prop[controls$Day==1],controls$Prop[controls$Day==2])
 wilcox.test(controls$Prop[controls$Day==1],controls$Prop[controls$Day==2])
+wilcox.test(controls$Prop[controls$Day==1],controls$Prop[controls$Day==3])
 
 (g<- ggplot(aes(y = Prop, x = as.factor(Day)), data = controls)+ 
     geom_boxplot() + 
@@ -72,7 +68,7 @@ drop1(glm48, test="Chisq")
 # Test for significance of surface
 desshortglass <- subset(desshort,Surface=="Glass")
 glm48surf <- glm(cbind(Active48,Inactive48) ~ DesLenFactor+WaterVolume, family=binomial, data=desshortglass)
-drop1(glm48, test="Chisq")
+drop1(glm48surf, test="Chisq")
 
 (sur = cld(lsmeans(glm48,~Surface:DesLenFactor, type="response")))
 
